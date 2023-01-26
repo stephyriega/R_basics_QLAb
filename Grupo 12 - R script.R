@@ -1,10 +1,18 @@
 #Importación de datos----
 #primero fijamos el directorio donde se ubican los archivos
-setwd("C:/Users/Cristian/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
+setwd("C:/Users/DELL/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
 getwd()
+#install.packages("ggpol")
 
 #importamos en df cada uno de los archivos
 library(readxl)
+library(ggplot2)
+library(ggpol)
+library(rio)
+library(dplyr)
+library(tidyverse)
+library(magrittr)
+
 candidatos <- read_xlsx("ERM2018_Candidatos_Distrital.xlsx")
 padron <- read_xlsx("ERM2018_Padron_Distrital.xlsx")
 resultados <- read_xlsx("ERM2018_Resultados_Distrital.xlsx")
@@ -51,7 +59,21 @@ names(autoridades)
 candidatos[,c("Region", "Provincia", "Distrito", "Organización Política", "Tipo Organización Política", "Cargo", "Sexo", "Joven")] <- lapply(candidatos[,c("Region", "Provincia", "Distrito", "Organización Política", "Tipo Organización Política", "Cargo", "Sexo", "Joven")], as.numeric)
 summary(candidatos)
 
+autoridades <- as.data.frame(autoridades)
 
+#Gráfico de parlamento de las ganadores a regidores municipales jovenes y no jovenes por sexo
+class(autoridades$Joven)
+
+autoridades <- autoridades |> 
+  dplyr::mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
+  dplyr::mutate(Nativo = ifelse(is.na(Nativo), "No Nativo", Nativo))
+
+
+
+aut_sum <- autoridades |> 
+  filter(autoridades$`Cargo electo`== "REGIDOR DISTRITAL") |> 
+  dplyr::group_by(Joven, Sexo) |> 
+  dplyr::summarise(regidores=n())
 
 
 

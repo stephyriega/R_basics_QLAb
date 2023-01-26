@@ -8,7 +8,7 @@ getwd()
 library(readxl)
 library(ggplot2)
 library(ggpol)
-library(rio)
+#library(rio)
 library(dplyr)
 library(tidyverse)
 library(magrittr)
@@ -59,9 +59,7 @@ names(autoridades)
 candidatos[,c("Region", "Provincia", "Distrito", "Organización Política", "Tipo Organización Política", "Cargo", "Sexo", "Joven")] <- lapply(candidatos[,c("Region", "Provincia", "Distrito", "Organización Política", "Tipo Organización Política", "Cargo", "Sexo", "Joven")], as.numeric)
 summary(candidatos)
 
-autoridades <- as.data.frame(autoridades)
-
-#Gráfico de parlamento de las ganadores a regidores municipales jovenes y no jovenes por sexo
+#Primero comprobamos que clase es la variable joven para poder completar la categoria faltante, como para la variable nativo. 
 class(autoridades$Joven)
 
 autoridades <- autoridades |> 
@@ -70,10 +68,56 @@ autoridades <- autoridades |>
 
 
 
+autoridades <- as.data.frame(autoridades)
+
+### Gráfico de parlamento de las ganadores a regidores municipales distritales por juventud y sexo ----
+
+#Creamos un cuadro resumen para ver la cantidad de REGIDORES DISTRITALES electos, filtrando solo este grupo usando filter().
+#Luego, agrupamos estas observaciones por si son jovenes o no y su sexo con la funcion group_by()
+#Por ultimo, resumimos estos datos contando cuantas observaciones existen, lo reducimos a centenas y redondeamos.
+
 aut_sum <- autoridades |> 
   filter(autoridades$`Cargo electo`== "REGIDOR DISTRITAL") |> 
   dplyr::group_by(Joven, Sexo) |> 
-  dplyr::summarise(regidores=n())
+  dplyr::summarise(regidores=round(n()/100))
+
+#para elaborar el cuadro, debemos agregar la columna de colors con el color correspondiente que queramos usando mutate.
+#Sin embargo, este esta determinado por la combinacion entre Joven y Sexo que se haga, por ello usamos case_when.
+aut_sum <-aut_sum |> 
+  mutate(colors = case_when(Joven == 'Joven' & Sexo == 'Femenino' ~ 'lightpink',
+                            Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
+                            Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
+                            Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
+                            ))
+#Por ultimo, usamos una extension de ggplot, geom_parluament, para representar a los regidores distritales por juventud y sexo.
+ggplot(aut_sum) + 
+  geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
+  scale_fill_manual(values = aut_sum$colors, labels = aut_sum$Joven) +
+  coord_fixed() + 
+  theme_void()+
+  labs(title = "Regidores distritales por juventud y sexo",
+       subtitle="Por si es joven y sexo (en centenas)")
+
+### Gráfico de parlamento de las ganadores a alcaldia municipal distrital jovenes y no jovenes por sexo ----
 
 
+aut_sum2 <- autoridades |> 
+  filter(autoridades$`Cargo electo`== "ALCALDE DISTRITAL") |> 
+  dplyr::group_by(Joven, Sexo) |> 
+  dplyr::summarise(regidores=round(n()))
 
+aut_sum2 <-aut_sum2 |> 
+  mutate(colors = case_when(Joven == 'Joven' & Sexo == 'Femenino' ~ 'lightpink',
+                            Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
+                            Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
+                            Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
+  ))
+
+
+ggplot(aut_sum2) + 
+  geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
+  scale_fill_manual(values = aut_sum$colors, labels = aut_sum$Joven) +
+  coord_fixed() + 
+  theme_void()+
+  labs(title = "Alcaldes distritales jovenes y no jovenes por sexo",
+       subtitle="Por si es joven y sexo (en centenas)")

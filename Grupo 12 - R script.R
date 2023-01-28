@@ -1,9 +1,8 @@
 #Importación de datos----
 #primero fijamos el directorio donde se ubican los archivos
-setwd("C:/Users/Cristian/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
+setwd("C:/Users/DELL/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
 getwd()
 #install.packages("ggpol")
-#install.packages("tidyverse")
 #importamos en df cada uno de los archivos
 library(readxl)
 library(ggplot2)
@@ -88,7 +87,9 @@ aut_sum <-aut_sum |>
                             Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
                             Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
                             Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
+
   ))
+
 #Por ultimo, usamos una extension de ggplot, geom_parluament, para representar a los regidores distritales por juventud y sexo.
 ggplot(aut_sum) + 
   geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
@@ -141,6 +142,24 @@ df <- df %>% mutate(region = if_else(departamento %in% c("Amazonas", "Áncash", 
                                              if_else(departamento %in% c("Arequipa", "Ayacucho", "Cusco", "Huánuco", "Puno", "Tacna"), "sur", "NA"))))
 
 
+aut_sum2 <- autoridades |> 
+  filter(autoridades$`Cargo electo`== "ALCALDE DISTRITAL") |> 
+  dplyr::group_by(Joven, Sexo) |> 
+  dplyr::summarise(regidores=round(n()))
+
+aut_sum2 <-aut_sum2 |> 
+  mutate(colors = case_when(Joven == 'Joven' & Sexo == 'Femenino' ~ 'lightpink',
+                            Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
+                            Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
+                            Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
+  ))
 
 library(ggmosaic)
 
+ggplot(aut_sum2) + 
+  geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
+  scale_fill_manual(values = aut_sum$colors, labels = aut_sum$Joven) +
+  coord_fixed() + 
+  theme_void()+
+  labs(title = "Alcaldes distritales jovenes y no jovenes por sexo",
+       subtitle="Por si es joven y sexo (en centenas)")

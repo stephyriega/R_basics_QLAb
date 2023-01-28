@@ -2,9 +2,17 @@
 #primero fijamos el directorio donde se ubican los archivos
 setwd("C:/Users/Cristian/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
 getwd()
-
+#install.packages("ggpol")
+#install.packages("tidyverse")
 #importamos en df cada uno de los archivos
 library(readxl)
+library(ggplot2)
+library(ggpol)
+#library(rio)
+library(dplyr)
+library(tidyverse)
+library(magrittr)
+
 candidatos <- read_xlsx("ERM2018_Candidatos_Distrital.xlsx")
 padron <- read_xlsx("ERM2018_Padron_Distrital.xlsx")
 resultados <- read_xlsx("ERM2018_Resultados_Distrital.xlsx")
@@ -51,7 +59,88 @@ names(autoridades)
 candidatos[,c("Region", "Provincia", "Distrito", "Organización Política", "Tipo Organización Política", "Cargo", "Sexo", "Joven")] <- lapply(candidatos[,c("Region", "Provincia", "Distrito", "Organización Política", "Tipo Organización Política", "Cargo", "Sexo", "Joven")], as.numeric)
 summary(candidatos)
 
+#Primero comprobamos que clase es la variable joven para poder completar la categoria faltante, como para la variable nativo. 
+class(autoridades$Joven)
+
+autoridades <- autoridades |> 
+  dplyr::mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
+  dplyr::mutate(Nativo = ifelse(is.na(Nativo), "No Nativo", Nativo))
 
 
 
+autoridades <- as.data.frame(autoridades)
+
+### Gráfico de parlamento de las ganadores a regidores municipales distritales por juventud y sexo ----
+
+#Creamos un cuadro resumen para ver la cantidad de REGIDORES DISTRITALES electos, filtrando solo este grupo usando filter().
+#Luego, agrupamos estas observaciones por si son jovenes o no y su sexo con la funcion group_by()
+#Por ultimo, resumimos estos datos contando cuantas observaciones existen, lo reducimos a centenas y redondeamos.
+
+aut_sum <- autoridades |> 
+  filter(autoridades$`Cargo electo`== "REGIDOR DISTRITAL") |> 
+  dplyr::group_by(Joven, Sexo) |> 
+  dplyr::summarise(regidores=round(n()/100))
+
+#para elaborar el cuadro, debemos agregar la columna de colors con el color correspondiente que queramos usando mutate.
+#Sin embargo, este esta determinado por la combinacion entre Joven y Sexo que se haga, por ello usamos case_when.
+aut_sum <-aut_sum |> 
+  mutate(colors = case_when(Joven == 'Joven' & Sexo == 'Femenino' ~ 'lightpink',
+                            Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
+                            Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
+                            Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
+  ))
+#Por ultimo, usamos una extension de ggplot, geom_parluament, para representar a los regidores distritales por juventud y sexo.
+ggplot(aut_sum) + 
+  geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
+  scale_fill_manual(values = aut_sum$colors, labels = aut_sum$Joven) +
+  coord_fixed() + 
+  theme_void()+
+  labs(title = "Regidores distritales por juventud y sexo",
+       subtitle="Por si es joven y sexo (en centenas)")
+
+### Gráfico de parlamento de las ganadores a alcaldia municipal distrital jovenes y no jovenes por sexo ----
+
+
+aut_sum2 <- autoridades |> 
+  filter(autoridades$`Cargo electo`== "ALCALDE DISTRITAL") |> 
+  dplyr::group_by(Joven, Sexo) |> 
+  dplyr::summarise(regidores=round(n()))
+
+aut_sum2 <-aut_sum2 |> 
+  mutate(colors = case_when(Joven == 'Joven' & Sexo == 'Femenino' ~ 'lightpink',
+                            Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
+                            Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
+                            Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
+  ))
+
+
+ggplot(aut_sum2) + 
+  geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
+  scale_fill_manual(values = aut_sum$colors, labels = aut_sum$Joven) +
+  coord_fixed() + 
+  theme_void()+
+  labs(title = "Alcaldes distritales jovenes y no jovenes por sexo",
+       subtitle="Por si es joven y sexo (en centenas)")
+
+#grafico de barras apiladas
+candidatos <- as.data.frame(candidatos)
+
+candidatos_2 <- candidatos |> 
+  mutate(macrorregion = if_else(Region %in% c("AMAZONAS", "ANCASH", "LA LIBERTAD", "LAMBAYEQUE", "LORETO", "PIURA", "SAN MARTIN"), "Norte",
+                          if_else(Region %in% c("LIMA", "CALLAO", "HUANCAVELICA", "ICA", "JUNIN", "PASCO", "UCAYALI"), "Centro",
+                                  if_else(Region %in% c("AREQUIPA", "AYACUCHO", "CUSCO", "HUANUCO", "PUNO", "TACNA"), "Sur", "NA"))))
+
+candidatos_2 |> 
+  group_by(macrorregion, Sexo) |> 
+  ggplot()+
+  geom_mosaic(aes(x = product(macrorregion), fill=Sexo)) +
+  theme_mosaic()
+  
+df <- df %>% mutate(region = if_else(departamento %in% c("Amazonas", "Áncash", "La Libertad", "Lambayeque", "Loreto", "Piura", "San Martín"), "norte",
+                                     if_else(departamento %in% c("Lima", "Callao", "Huancavelica", "Ica", "Junín", "Pasco", "Ucayali"), "centro",
+                                             if_else(departamento %in% c("Arequipa", "Ayacucho", "Cusco", "Huánuco", "Puno", "Tacna"), "sur", "NA"))))
+
+
+
+library(ggmosaic)
 

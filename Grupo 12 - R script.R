@@ -3,7 +3,6 @@
 setwd("C:/Users/DELL/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
 getwd()
 #install.packages("ggpol")
-
 #importamos en df cada uno de los archivos
 library(readxl)
 library(ggplot2)
@@ -88,7 +87,9 @@ aut_sum <-aut_sum |>
                             Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
                             Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
                             Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
-                            ))
+
+  ))
+
 #Por ultimo, usamos una extension de ggplot, geom_parluament, para representar a los regidores distritales por juventud y sexo.
 ggplot(aut_sum) + 
   geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
@@ -113,6 +114,47 @@ aut_sum2 <-aut_sum2 |>
                             Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
   ))
 
+
+ggplot(aut_sum2) + 
+  geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
+  scale_fill_manual(values = aut_sum$colors, labels = aut_sum$Joven) +
+  coord_fixed() + 
+  theme_void()+
+  labs(title = "Alcaldes distritales jovenes y no jovenes por sexo",
+       subtitle="Por si es joven y sexo (en centenas)")
+
+#grafico de barras apiladas
+candidatos <- as.data.frame(candidatos)
+
+candidatos_2 <- candidatos |> 
+  mutate(macrorregion = if_else(Region %in% c("AMAZONAS", "ANCASH", "LA LIBERTAD", "LAMBAYEQUE", "LORETO", "PIURA", "SAN MARTIN"), "Norte",
+                          if_else(Region %in% c("LIMA", "CALLAO", "HUANCAVELICA", "ICA", "JUNIN", "PASCO", "UCAYALI"), "Centro",
+                                  if_else(Region %in% c("AREQUIPA", "AYACUCHO", "CUSCO", "HUANUCO", "PUNO", "TACNA"), "Sur", "NA"))))
+
+candidatos_2 |> 
+  group_by(macrorregion, Sexo) |> 
+  ggplot()+
+  geom_mosaic(aes(x = product(macrorregion), fill=Sexo)) +
+  theme_mosaic()
+  
+df <- df %>% mutate(region = if_else(departamento %in% c("Amazonas", "Áncash", "La Libertad", "Lambayeque", "Loreto", "Piura", "San Martín"), "norte",
+                                     if_else(departamento %in% c("Lima", "Callao", "Huancavelica", "Ica", "Junín", "Pasco", "Ucayali"), "centro",
+                                             if_else(departamento %in% c("Arequipa", "Ayacucho", "Cusco", "Huánuco", "Puno", "Tacna"), "sur", "NA"))))
+
+
+aut_sum2 <- autoridades |> 
+  filter(autoridades$`Cargo electo`== "ALCALDE DISTRITAL") |> 
+  dplyr::group_by(Joven, Sexo) |> 
+  dplyr::summarise(regidores=round(n()))
+
+aut_sum2 <-aut_sum2 |> 
+  mutate(colors = case_when(Joven == 'Joven' & Sexo == 'Femenino' ~ 'lightpink',
+                            Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
+                            Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
+                            Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
+  ))
+
+library(ggmosaic)
 
 ggplot(aut_sum2) + 
   geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 

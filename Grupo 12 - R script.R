@@ -7,10 +7,11 @@ getwd()
 library(readxl)
 library(ggplot2)
 library(ggpol)
-#library(rio)
+library(rio)
 library(dplyr)
 library(tidyverse)
 library(magrittr)
+library(ggmosaic)
 
 candidatos <- read_xlsx("ERM2018_Candidatos_Distrital.xlsx")
 padron <- read_xlsx("ERM2018_Padron_Distrital.xlsx")
@@ -29,31 +30,6 @@ names(resultados)
 names(autoridades)
 # df que muestra los alcades elegidos y sus regidores por distrito
 
-# comentarios----
-##electores (padron)----
-#distribucion de electores por sexo, por edad (4 escenarios)
-#distribucion de electores por macroregion (costa, sierra, selva -- norte, centro y sur)
-
-##candidatos----
-#distribucion de candidatos por organizacion politica, sexo (opc agregar cargo, nativo)
-#distribucion de candidatos por cargo y sexo
-#distribucion de candidatos por macroregion (costa, sierra, selva -- norte, centro y sur)
-#analizar el campo 'N°' del df
-#distribucion de candidatos por tipo de organizacion politica (unique(candidatos$`Tipo Organización Política`))
-
-##autoridades----
-#distribucion de autoridades elegidas por organizacion politica, sexo (opc agregar cargo, nativo)
-#distribucion de candidatos por cargo y sexo
-#distribucion de candidatos por macroregion (costa, sierra, selva -- norte, centro y sur)
-#distribucion de candidatos por tipo de organizacion politica
-#qué tanto se pasó el umbral minimo para ganar la eleccion (30%)? diferenciar por sexo
-#alcades y regidores pertenecen a la misma organización politica? analizar efecto arrastre
-
-##resultados----
-#distribucion de participacion por region
-#comparar %votos vs %votos organizacion politica (df autoridades)
-
-#para edades indicar solamente la proporcion de jovenes respecto al total
 
 candidatos[,c("Region", "Provincia", "Distrito", "Organización Política", "Tipo Organización Política", "Cargo", "Sexo", "Joven")] <- lapply(candidatos[,c("Region", "Provincia", "Distrito", "Organización Política", "Tipo Organización Política", "Cargo", "Sexo", "Joven")], as.numeric)
 summary(candidatos)
@@ -64,8 +40,6 @@ class(autoridades$Joven)
 autoridades <- autoridades |> 
   dplyr::mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
   dplyr::mutate(Nativo = ifelse(is.na(Nativo), "No Nativo", Nativo))
-
-
 
 autoridades <- as.data.frame(autoridades)
 
@@ -141,25 +115,3 @@ df <- df %>% mutate(region = if_else(departamento %in% c("Amazonas", "Áncash", 
                                      if_else(departamento %in% c("Lima", "Callao", "Huancavelica", "Ica", "Junín", "Pasco", "Ucayali"), "centro",
                                              if_else(departamento %in% c("Arequipa", "Ayacucho", "Cusco", "Huánuco", "Puno", "Tacna"), "sur", "NA"))))
 
-
-aut_sum2 <- autoridades |> 
-  filter(autoridades$`Cargo electo`== "ALCALDE DISTRITAL") |> 
-  dplyr::group_by(Joven, Sexo) |> 
-  dplyr::summarise(regidores=round(n()))
-
-aut_sum2 <-aut_sum2 |> 
-  mutate(colors = case_when(Joven == 'Joven' & Sexo == 'Femenino' ~ 'lightpink',
-                            Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
-                            Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
-                            Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
-  ))
-
-library(ggmosaic)
-
-ggplot(aut_sum2) + 
-  geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
-  scale_fill_manual(values = aut_sum$colors, labels = aut_sum$Joven) +
-  coord_fixed() + 
-  theme_void()+
-  labs(title = "Alcaldes distritales jovenes y no jovenes por sexo",
-       subtitle="Por si es joven y sexo (en centenas)")

@@ -11,21 +11,22 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introducción
 
-La desigualdad en la participación politica de las mujeres ha sido una constante en la escena peruana en todos sus niveles de eleccion. En las organizaciones politicas, las mujeres representaban la mitad de la militancia pero menos del 30% de la dirigencia nacional. Menos del 7% de candidatos a puestos de regidores nacionales han sido mujeres desde la creacion de estos cargos en el 2002. Desde 1995, el primer año en que una mujer formó parte de una candidatura de la fórmula presidencial; menos del 13% de las candidaturas a esta lista han estado compuestas por mujeres. 
+La desigualdad en la participación politica de las mujeres ha sido una constante en la escena peruana en todos sus niveles de eleccion. En las organizaciones politicas, las mujeres representaban la mitad de la militancia pero menos del 30% de la dirigencia nacional. Menos del 7% de candidatos a puestos de regidores nacionales han sido mujeres desde la creacion de estos cargos en el 2002. Desde 1995, el primer año en que una mujer formó parte de una candidatura de la fórmula presidencial; menos del 13% de las candidaturas a esta lista han estado compuestas por mujeres (Dirección Nacional de educación y formación cívica ciudadana. 2020). 
 
-Con el fin de revertir esto, en las Elecciones Regionales Municipales (ERM) del 2022, se implementó la ley de alternancia en el Peru. Esto aplica para las elecciones presidenciales (toda la fórmula presidencial) , regionales (fórmula al cargo de gobernador y vicegobernado regional) , municipales (lista para los regidores o concejo municipal) , y en los partidos politicos (las listas de los cargos de direccion). 
 
-La ley de paridad y alternancia tuvo impactos en las elecciones internas ERM en terminos de género, siendo la más general que el porcentaje de mujeres candidatas en este tipo de elecciones aumentó en 3.9% en comparación de las elecciones internas del 2018 (43.4%). Así, parece que la ley de paridad y alternancia se cumplio poniendo a la mujer como segunda al mando en las elecciones internas a nivel regional. El porcentaje de mujeres en las precandidaturas en el 2022 como gobernadora regional fue de 28.3%, mientras que para el puesto de vicegobernador regional fue de 71.7%. 
+Con el fin de revertir esto, en las Elecciones Regionales Municipales (ERM) del 2022, se implementó la ley de alternancia en el Peru. Esto aplica para las elecciones presidenciales (toda la fórmula presidencial) , regionales (fórmula al cargo de gobernador y vicegobernado regional) , municipales (lista para los regidores o concejo municipal) , y en los partidos politicos (las listas de los cargos de direccion) (Dirección Nacional de educación y formación cívica ciudadana. 2022). 
 
-Sin embargo, esta ley no tuvo impacto en las elecciones municipales para las fórmulas de alcaldia en las elecciones internas ERM 2022, a pesar de que las mujeres candidatas nunca han representado más del 8% del total de las candidaturas. Tanto para los puestos de alcalde provincial como de alcalde distrital, el porcentaje de las precandidaturas de mujeres se mantuvo menor al 15% (10.6% y 11.2%, respectivamente). 
+La ley de paridad y alternancia tuvo impactos en las elecciones internas ERM en terminos de género, siendo la más general que el porcentaje de mujeres candidatas en este tipo de elecciones aumentó en 3.9% en comparación de las elecciones internas del 2018 (43.4%) (Dirección Nacional de educación y formación cívica ciudadana. 2022). Así, parece que la ley de paridad y alternancia se cumplio poniendo a la mujer como segunda al mando en las elecciones internas a nivel regional. El porcentaje de mujeres en las precandidaturas en el 2022 como gobernadora regional fue de 28.3%, mientras que para el puesto de vicegobernador regional fue de 71.7% (Dirección Nacional de educación y formación cívica ciudadana. 2022). 
+
+Sin embargo, esta ley no tuvo impacto en las elecciones municipales para las fórmulas de alcaldia en las elecciones internas ERM 2022, a pesar de que las mujeres candidatas nunca han representado más del 8% del total de las candidaturas. Tanto para los puestos de alcalde provincial como de alcalde distrital, el porcentaje de las precandidaturas de mujeres se mantuvo menor al 15% (10.6% y 11.2%, respectivamente) (Dirección Nacional de educación y formación cívica ciudadana. 2022). 
 
 Debido a esto, buscamos exponer con el siguiente trabajo la desigualdad que aún persiste en la participacion de la mujer en las últimas elecciones ERM municipales a nivel distrital. Esto, con el fin de entender por qué se deberian realizar este trabajo pendiente de aplicar la ley a este nivel y adoptar las medidas para revertir esta desigualdad en la participacion politica de las mujeres.
 
-Consideramos importante un trabajo descriptivo puesto que podria ser fundamental para el estudio posterior En aquellas circunstancias en las que el conocimiento sobre un topico es menor del que se quisiera, la descripcion es necesaria Es decir, si es que queremos determinar el posible efecto que pueda tener la ley de paridad y alternancia en las elecciones de este tipo, debemos saber sobre aquella de lo que se va buscar hallar su causa segun las caracteristicas que este tenga. 
+Consideramos importante un trabajo descriptivo puesto que podria ser fundamental para el estudio posterior En aquellas circunstancias en las que el conocimiento sobre un topico es menor del que se quisiera, la descripcion es necesaria (Gerring, 2012). Es decir, si es que queremos determinar el posible efecto que pueda tener la ley de paridad y alternancia en las elecciones de este tipo, debemos saber sobre aquella de lo que se va buscar hallar su causa segun las caracteristicas que este tenga. Aun así, el ejercicio de descripcion es relevante y propio de estudio por como podemos ver este fenómeno de desigualdad (Gerring, 2012). 
 
-Aun así, el ejercicio de descripcion es relevante y propio de estudio por como podemos ver este fenómeno de desigualdad. Por un lado, como definimos la desigualdad en la participacion importa pues, como otro diversos fenomenos estudiados, podemos hablar de la carencia absoluta y relativa. Es decir, podemos optar por la definición de desigualdad comparando si es que, a ciertos niveles, no se alcanzó el 50% de mujeres elegidas en puesto; o acercarnos a esta definicion en comparación no del 50%, sino del porcentaje promedio que se haya encontrado a estos niveles (que, por ejemplo, pueda ser 30%). 
+Por un lado, como definimos la desigualdad en la participacion importa pues, como otro diversos fenomenos estudiados, podemos hablar de la carencia absoluta y relativa. Es decir, podemos optar por la definición de desigualdad comparando si es que, a ciertos niveles, no se alcanzó el 50% de mujeres elegidas en puesto; o acercarnos a esta definicion en comparación no del 50%, sino del porcentaje promedio que se haya encontrado a estos niveles (que, por ejemplo, pueda ser 30%). 
 
-Antes de esta ley, no existía una determinada norma que obligara la postulacion participación equitativa de las mujeres en los cargos ,ejecutivos como concejales, o en las preferencia en las listas, de regidores o consejo municipal . Es decir, puede que este último porcentaje que planteamos sea mínimo. Aun así, consideramos que es importante de evaluar pues nos puede dar un indicio de que unidades presentan avances mínimos hacia la igualdad de la participación politicas de las mujeres, aun sin una ley que los obligara.
+Antes de esta ley, no existía una determinada norma que obligara la postulacion participación equitativa de las mujeres en los cargos ,ejecutivos como concejales, o en las preferencia en las listas, de regidores o consejo municipal . Es decir, puede que este último porcentaje que planteamos sea mínimo. Aun así, consideramos que es importante de evaluar pues nos puede dar un indicio de que unidades presentan avances mínimos hacia la igualdad de la participación politicas de las mujeres, aun sin una ley que los obligara. 
 
 
 ## Metodología
@@ -105,6 +106,9 @@ ggplot(aut_sum) +
        subtitle="Por si es joven y sexo (en centenas)")
 ```
 
+Si juntamos a todos los regidores municipales distritales elegidos por sexo y los dividimos por si son jovenes o no, obtenemos los siguientes resultados en centenas. Primero, podemos ver que la mayoría del grupo estaria compuesto por hombres, tanto jovenes como no jovenes, puesto que representan más del 70% de los representantes escogidos en el 2018. Sin embargo, parece que sí existe una diferenciación a nivel de juventud. Pues, al analizar estos datos para los representantes que son jovenes, las mujeres son el 62.5% de los representantes, mientras que para los representantes no jovenes, los hombres son el 76.9% en esta subseccion. Así, parece que existe una mayor proporcion de representantes jovenes elegidas como regidoras municipales distritales en el 2022, aunque no se puede ver lo mismo para el grupo de los representantes no jovenes. 
+
+
 ```{r}
 ### Gráfico de parlamento de las ganadores a alcaldia municipal distrital jovenes y no jovenes por sexo ----
 
@@ -131,6 +135,8 @@ ggplot(aut_sum2) +
        subtitle="Por si es joven y sexo (en centenas)")
 ```
 
+
+En comparación con los regidores, parece que esta situación de mayor eleccion masculina no se invierte en el grupo de los jovenes. Podemos ver que, igualmente que en la situación de los regidores, la mayoría del grupo estaria compuesto por hombres, tanto jovenes como no jovenes, puesto que representan más del 90% de los alcaldes escogidos en el 2018. Al analizar estos datos para los alcades que son jovenes, las mujeres no son ni el  6% de los representantes, mientras que para los representantes no jovenes, las mujeres no son ni el 10% de los alcaldes elegidos. De esta manera, existe una mayor proporcion de representantes jovenes y no jovenes elegidos que son hombres en las elecciones de alcaldia municipales distritales en el 2022. Esto se puede deber a que el puesto de alcaldia implica mayor exposicion y poder en comparación con los regidores. Debido a ciertos prejuicios que se mantienen sobre las caracteristicas de una mujer, puede que se crea que estas no son adecuadas ni para postular a estos puestos (decision que se toma por parte de las agrupaciones politicas) ni para ejercerlos (decision de los votantes). 
 
 ```{r}
 ### Grafico de indicador de preferencia por sexo y distrito ----
@@ -227,7 +233,11 @@ autoridades_2 |>
 ```
 
 
+## Bibliografía
 
+Dirección Nacional de educación y formación cívica ciudadana. (2022). Paridad y alternancia en las elecciones internas ERM 2022.
+Direccion Nacional de Educación y Formación Cívico Ciudadana. (2020). Paridad y alternancia de género en las listas electorales Ley 31030.
+Gerring, J. (2012). Mere description. British Journal of Political Science, 42(4), 721–746. https://doi.org/10.1017/S0007123412000130
 
 
 

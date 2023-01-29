@@ -1,6 +1,6 @@
 #Importación de datos----
 #primero fijamos el directorio donde se ubican los archivos
-setwd("C:/Users/DELL/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
+setwd("C:/Users/valer/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
 getwd()
 #install.packages("ggpol")
 #importamos en df cada uno de los archivos
@@ -11,52 +11,39 @@ library(ggpol)
 library(dplyr)
 library(tidyverse)
 library(magrittr)
+library(ggmosaic)
+
 
 candidatos <- read_xlsx("ERM2018_Candidatos_Distrital.xlsx")
 padron <- read_xlsx("ERM2018_Padron_Distrital.xlsx")
 resultados <- read_xlsx("ERM2018_Resultados_Distrital.xlsx")
 autoridades <- read_xlsx("ERM2018_Autoridades_Distrital.xlsx")
 
-names(candidatos)
-#este df muestra los candidatos por distrios y partido politico
 
-names(padron)
-#este df muestra la proporcion de electores por distrito, edad y sexo
 
-names(resultados)
-# df que muestra los resultados por distrito y partido politico
 
-names(autoridades)
-# df que muestra los alcades elegidos y sus regidores por distrito
+#Genera cuadro que indica cantidad de candidatos por sexo
+candidatos_sexo <- candidatos |> 
+  filter(candidatos$`Cargo`== "ALCALDE DISTRITAL") |> 
+  dplyr::group_by(Sexo) |> 
+  dplyr::summarise(candidatos=sum(n()))
 
-# comentarios----
-##electores (padron)----
-#distribucion de electores por sexo, por edad (4 escenarios)
-#distribucion de electores por macroregion (costa, sierra, selva -- norte, centro y sur)
+#Genera cuadro que indica cantidad de candidatos por distrito y sexo 
+candidatos_sexo_distrito <- candidatos |> 
+  filter(candidatos$`Cargo`== "ALCALDE DISTRITAL") |> 
+  dplyr::group_by(Distrito, Sexo) |> 
+  dplyr::summarise(candidatos_distrital1=sum(n()))
 
-##candidatos----
-#distribucion de candidatos por organizacion politica, sexo (opc agregar cargo, nativo)
-#distribucion de candidatos por cargo y sexo
-#distribucion de candidatos por macroregion (costa, sierra, selva -- norte, centro y sur)
-#analizar el campo 'N°' del df
-#distribucion de candidatos por tipo de organizacion politica (unique(candidatos$`Tipo Organización Política`))
-
-##autoridades----
-#distribucion de autoridades elegidas por organizacion politica, sexo (opc agregar cargo, nativo)
-#distribucion de candidatos por cargo y sexo
-#distribucion de candidatos por macroregion (costa, sierra, selva -- norte, centro y sur)
-#distribucion de candidatos por tipo de organizacion politica
-#qué tanto se pasó el umbral minimo para ganar la eleccion (30%)? diferenciar por sexo
-#alcades y regidores pertenecen a la misma organización politica? analizar efecto arrastre
-
-##resultados----
-#distribucion de participacion por region
-#comparar %votos vs %votos organizacion politica (df autoridades)
-
-#para edades indicar solamente la proporcion de jovenes respecto al total
-
-candidatos[,c("Region", "Provincia", "Distrito", "Organización Política", "Tipo Organización Política", "Cargo", "Sexo", "Joven")] <- lapply(candidatos[,c("Region", "Provincia", "Distrito", "Organización Política", "Tipo Organización Política", "Cargo", "Sexo", "Joven")], as.numeric)
-summary(candidatos)
+#Genera cuadro que indica cantidad de candidatos por distrito y sexo.
+#La diferencia con el anterior cuadro es que estos distritos tienen candidatos
+#femeninos y masculinos. 
+#En el anterior, hay distritos que solo presentan o femeninos o masculinos
+candidatos_2sexo_distrito <- candidatos %>% 
+  filter(candidatos$`Cargo`== "ALCALDE DISTRITAL") %>% 
+  group_by(Distrito) %>% 
+  filter(n_distinct(Sexo)== 2) %>% 
+  group_by(Distrito, Sexo) %>% 
+  summarise(candidatos_distrital2=sum(n()))
 
 #Primero comprobamos que clase es la variable joven para poder completar la categoria faltante, como para la variable nativo. 
 class(autoridades$Joven)
@@ -64,8 +51,6 @@ class(autoridades$Joven)
 autoridades <- autoridades |> 
   dplyr::mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
   dplyr::mutate(Nativo = ifelse(is.na(Nativo), "No Nativo", Nativo))
-
-
 
 autoridades <- as.data.frame(autoridades)
 
@@ -137,29 +122,38 @@ candidatos_2 |>
   geom_mosaic(aes(x = product(macrorregion), fill=Sexo)) +
   theme_mosaic()
   
-df <- df %>% mutate(region = if_else(departamento %in% c("Amazonas", "Áncash", "La Libertad", "Lambayeque", "Loreto", "Piura", "San Martín"), "norte",
-                                     if_else(departamento %in% c("Lima", "Callao", "Huancavelica", "Ica", "Junín", "Pasco", "Ucayali"), "centro",
-                                             if_else(departamento %in% c("Arequipa", "Ayacucho", "Cusco", "Huánuco", "Puno", "Tacna"), "sur", "NA"))))
+
+candidatos <- as.data.frame(candidatos)
+### Grafico de indicador de preferencia por sexo y distrito ----
+candidatos %>%
+  group_by(Sexo, Cargo, Distrito) %>%
+  summarize(count = n()) %>%  
+  # Crea el gráfico mediante ggplot 
+  ggplot(aes(x = Distrito, y = count, fill = Sexo)) +
+  # Agrega barra con tamaño proporcional a la cantidad de candidatos
+  geom_bar(stat = "identity", position = "fill") + 
+  facet_wrap(~ Cargo ) + #divide el gráfico por cargo
+  #Para colocar la leyenda en la parte inferior del gráfico y para no colocar los nombres de Distro en eje x
+  theme(legend.position = "bottom", axis.text.x = element_blank(), axis.ticks.x = element_blank()) + 
+  # Coloca etiquetas y título. En este gráfico no se considera los nombres del eje x debido a su extensión 
+  ylab("Indicador de preferencia") +
+  ggtitle("Distribución de Candidatos por distrito") 
 
 
-aut_sum2 <- autoridades |> 
-  filter(autoridades$`Cargo electo`== "ALCALDE DISTRITAL") |> 
-  dplyr::group_by(Joven, Sexo) |> 
-  dplyr::summarise(regidores=round(n()))
-
-aut_sum2 <-aut_sum2 |> 
-  mutate(colors = case_when(Joven == 'Joven' & Sexo == 'Femenino' ~ 'lightpink',
-                            Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
-                            Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
-                            Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
-  ))
-
-library(ggmosaic)
-
-ggplot(aut_sum2) + 
-  geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
-  scale_fill_manual(values = aut_sum$colors, labels = aut_sum$Joven) +
-  coord_fixed() + 
-  theme_void()+
-  labs(title = "Alcaldes distritales jovenes y no jovenes por sexo",
-       subtitle="Por si es joven y sexo (en centenas)")
+### Grafico de indicador de preferencia por sexo y distrito ----
+unique(candidatos$Region)
+candidatos %>%
+  group_by(Region, Sexo, Cargo, Distrito) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = Region, y = count, fill = Sexo)) +
+  # Agrega barra con tamaño proporcional a la cantidad de candidatos
+  geom_bar(stat = "identity", position = "fill") +
+  facet_wrap(~ Cargo ) + #divide el gráfico por cargo
+  # Para colocar la leyenda en la parte inferior del gráfico
+  theme(legend.position = "bottom") + 
+  # Coloca etiquetas y título 
+  xlab("Region") +
+  ylab("Indicador de preferencia") +
+  ggtitle("Distribución de Candidatos por departamento")+
+  # Ayuda a convertir los nombres horizontales en verticales, para que no aparezcan superpuestos
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 

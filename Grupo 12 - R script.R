@@ -7,7 +7,7 @@ getwd()
 library(readxl)
 library(ggplot2)
 library(ggpol)
-#library(rio)
+library(rio)
 library(dplyr)
 library(tidyverse)
 library(magrittr)
@@ -28,6 +28,7 @@ candidatos_sexo <- candidatos |>
   dplyr::group_by(Sexo) |> 
   dplyr::summarise(candidatos=sum(n()))
 
+
 #Genera cuadro que indica cantidad de candidatos por distrito y sexo 
 candidatos_sexo_distrito <- candidatos |> 
   filter(candidatos$`Cargo`== "ALCALDE DISTRITAL") |> 
@@ -44,6 +45,7 @@ candidatos_2sexo_distrito <- candidatos %>%
   filter(n_distinct(Sexo)== 2) %>% 
   group_by(Distrito, Sexo) %>% 
   summarise(candidatos_distrital2=sum(n()))
+
 
 #Primero comprobamos que clase es la variable joven para poder completar la categoria faltante, como para la variable nativo. 
 class(autoridades$Joven)
@@ -140,6 +142,7 @@ candidatos %>%
   ggtitle("Distribución de Candidatos por distrito") 
 
 
+
 ### Grafico de indicador de preferencia por sexo y distrito ----
 unique(candidatos$Region)
 candidatos %>%
@@ -157,3 +160,4 @@ candidatos %>%
   ggtitle("Distribución de Candidatos por departamento")+
   # Ayuda a convertir los nombres horizontales en verticales, para que no aparezcan superpuestos
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+

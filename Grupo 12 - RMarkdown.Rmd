@@ -1,0 +1,143 @@
+---
+title: "Análisis de las elecciones municipales distritales 2018"
+author: "Grupo 12"
+date: "2023-01-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introducción
+
+La desigualdad en la participación politica de las mujeres ha sido una constante en la escena peruana en todos sus niveles de eleccion. En las organizaciones politicas, las mujeres representaban la mitad de la militancia pero menos del 30% de la dirigencia nacional. Menos del 7% de candidatos a puestos de regidores nacionales han sido mujeres desde la creacion de estos cargos en el 2002. Desde 1995, el primer año en que una mujer formó parte de una candidatura de la fórmula presidencial; menos del 13% de las candidaturas a esta lista han estado compuestas por mujeres. 
+
+Con el fin de revertir esto, en las Elecciones Regionales Municipales (ERM) del 2022, se implementó la ley de alternancia en el Peru. Esto aplica para las elecciones presidenciales (toda la fórmula presidencial) , regionales (fórmula al cargo de gobernador y vicegobernado regional) , municipales (lista para los regidores o concejo municipal) , y en los partidos politicos (las listas de los cargos de direccion). 
+
+La ley de paridad y alternancia tuvo impactos en las elecciones internas ERM en terminos de género, siendo la más general que el porcentaje de mujeres candidatas en este tipo de elecciones aumentó en 3.9% en comparación de las elecciones internas del 2018 (43.4%). Así, parece que la ley de paridad y alternancia se cumplio poniendo a la mujer como segunda al mando en las elecciones internas a nivel regional. El porcentaje de mujeres en las precandidaturas en el 2022 como gobernadora regional fue de 28.3%, mientras que para el puesto de vicegobernador regional fue de 71.7%. 
+
+Sin embargo, esta ley no tuvo impacto en las elecciones municipales para las fórmulas de alcaldia en las elecciones internas ERM 2022, a pesar de que las mujeres candidatas nunca han representado más del 8% del total de las candidaturas. Tanto para los puestos de alcalde provincial como de alcalde distrital, el porcentaje de las precandidaturas de mujeres se mantuvo menor al 15% (10.6% y 11.2%, respectivamente). 
+
+Debido a esto, buscamos exponer con el siguiente trabajo la desigualdad que aún persiste en la participacion de la mujer en las últimas elecciones ERM municipales a nivel distrital. Esto, con el fin de entender por qué se deberian realizar este trabajo pendiente de aplicar la ley a este nivel y adoptar las medidas para revertir esta desigualdad en la participacion politica de las mujeres.
+
+Consideramos importante un trabajo descriptivo puesto que podria ser fundamental para el estudio posterior En aquellas circunstancias en las que el conocimiento sobre un topico es menor del que se quisiera, la descripcion es necesaria Es decir, si es que queremos determinar el posible efecto que pueda tener la ley de paridad y alternancia en las elecciones de este tipo, debemos saber sobre aquella de lo que se va buscar hallar su causa segun las caracteristicas que este tenga. 
+
+Aun así, el ejercicio de descripcion es relevante y propio de estudio por como podemos ver este fenómeno de desigualdad. Por un lado, como definimos la desigualdad en la participacion importa pues, como otro diversos fenomenos estudiados, podemos hablar de la carencia absoluta y relativa. Es decir, podemos optar por la definición de desigualdad comparando si es que, a ciertos niveles, no se alcanzó el 50% de mujeres elegidas en puesto; o acercarnos a esta definicion en comparación no del 50%, sino del porcentaje promedio que se haya encontrado a estos niveles (que, por ejemplo, pueda ser 30%). 
+
+Antes de esta ley, no existía una determinada norma que obligara la postulacion participación equitativa de las mujeres en los cargos ,ejecutivos como concejales, o en las preferencia en las listas, de regidores o consejo municipal . Es decir, puede que este último porcentaje que planteamos sea mínimo. Aun así, consideramos que es importante de evaluar pues nos puede dar un indicio de que unidades presentan avances mínimos hacia la igualdad de la participación politicas de las mujeres, aun sin una ley que los obligara.
+
+
+```{r}
+#Importación de datos----
+#Primero fijamos el directorio donde se ubican los archivos
+setwd("C:/Users/Cristian/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
+getwd()
+```
+
+```{r}
+#Activamos las librerías 
+#Importamos en dataframe cada uno de los archivos
+library(readxl)
+library(ggplot2)
+library(ggpol)
+library(dplyr)
+library(tidyverse)
+library(magrittr)
+candidatos <- read_xlsx("ERM2018_Candidatos_Distrital.xlsx")
+padron <- read_xlsx("ERM2018_Padron_Distrital.xlsx")
+resultados <- read_xlsx("ERM2018_Resultados_Distrital.xlsx")
+autoridades <- read_xlsx("ERM2018_Autoridades_Distrital.xlsx")
+```
+
+```{r}
+#Primero comprobamos que clase es la variable joven para poder completar la categoria faltante, como para la variable nativo. 
+class(autoridades$Joven)
+
+autoridades <- autoridades |> 
+  dplyr::mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
+  dplyr::mutate(Nativo = ifelse(is.na(Nativo), "No Nativo", Nativo))
+
+autoridades <- as.data.frame(autoridades)
+
+```
+
+```{r}
+### Gráfico de parlamento de las ganadores a regidores municipales distritales por juventud y sexo ----
+
+#Creamos un cuadro resumen para ver la cantidad de REGIDORES DISTRITALES electos, filtrando solo este grupo usando filter().
+#Luego, agrupamos estas observaciones por si son jovenes o no y su sexo con la funcion group_by()
+#Por ultimo, resumimos estos datos contando cuantas observaciones existen, lo reducimos a centenas y redondeamos.
+
+aut_sum <- autoridades |> 
+  filter(autoridades$`Cargo electo`== "REGIDOR DISTRITAL") |> 
+  dplyr::group_by(Joven, Sexo) |> 
+  dplyr::summarise(regidores=round(n()/100))
+
+#para elaborar el cuadro, debemos agregar la columna de colors con el color correspondiente que queramos usando mutate.
+#Sin embargo, este esta determinado por la combinacion entre Joven y Sexo que se haga, por ello usamos case_when.
+aut_sum <-aut_sum |> 
+  mutate(colors = case_when(Joven == 'Joven' & Sexo == 'Femenino' ~ 'lightpink',
+                            Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
+                            Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
+                            Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
+
+  ))
+
+#Por ultimo, usamos una extension de ggplot, geom_parluament, para representar a los regidores distritales por juventud y sexo.
+ggplot(aut_sum) + 
+  geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
+  scale_fill_manual(values = aut_sum$colors, labels = aut_sum$Joven) +
+  coord_fixed() + 
+  theme_void()+
+  labs(title = "Regidores distritales por juventud y sexo",
+       subtitle="Por si es joven y sexo (en centenas)")
+```
+
+```{r}
+### Gráfico de parlamento de las ganadores a alcaldia municipal distrital jovenes y no jovenes por sexo ----
+
+
+aut_sum2 <- autoridades |> 
+  filter(autoridades$`Cargo electo`== "ALCALDE DISTRITAL") |> 
+  dplyr::group_by(Joven, Sexo) |> 
+  dplyr::summarise(regidores=round(n()))
+
+aut_sum2 <-aut_sum2 |> 
+  mutate(colors = case_when(Joven == 'Joven' & Sexo == 'Femenino' ~ 'lightpink',
+                            Joven == 'Joven' & Sexo == 'Masculino' ~ 'lightblue',
+                            Joven == 'No Joven' & Sexo == 'Femenino' ~ 'red',
+                            Joven == 'No Joven' & Sexo == 'Masculino' ~ 'blue'
+  ))
+
+
+ggplot(aut_sum2) + 
+  geom_parliament(aes(seats = regidores, fill = Joven), color = "black") + 
+  scale_fill_manual(values = aut_sum$colors, labels = aut_sum$Joven) +
+  coord_fixed() + 
+  theme_void()+
+  labs(title = "Alcaldes distritales jovenes y no jovenes por sexo",
+       subtitle="Por si es joven y sexo (en centenas)")
+```
+
+```{r}
+#grafico de barras apiladas
+candidatos <- as.data.frame(candidatos)
+
+candidatos_2 <- candidatos |> 
+  mutate(macrorregion = if_else(Region %in% c("AMAZONAS", "ANCASH", "LA LIBERTAD", "LAMBAYEQUE", "LORETO", "PIURA", "SAN MARTIN"), "Norte",
+                          if_else(Region %in% c("LIMA", "CALLAO", "HUANCAVELICA", "ICA", "JUNIN", "PASCO", "UCAYALI"), "Centro",
+                                  if_else(Region %in% c("AREQUIPA", "AYACUCHO", "CUSCO", "HUANUCO", "PUNO", "TACNA"), "Sur", "NA"))))
+
+candidatos_2 |> 
+  group_by(macrorregion, Sexo) |> 
+  ggplot()+
+  geom_mosaic(aes(x = product(macrorregion), fill=Sexo)) +
+  theme_mosaic()
+  
+df <- df %>% mutate(region = if_else(departamento %in% c("Amazonas", "Áncash", "La Libertad", "Lambayeque", "Loreto", "Piura", "San Martín"), "norte",
+                                     if_else(departamento %in% c("Lima", "Callao", "Huancavelica", "Ica", "Junín", "Pasco", "Ucayali"), "centro",
+                                             if_else(departamento %in% c("Arequipa", "Ayacucho", "Cusco", "Huánuco", "Puno", "Tacna"), "sur", "NA"))))
+
+```
+

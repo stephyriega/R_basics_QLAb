@@ -1,6 +1,6 @@
 ---
 title: "Análisis de las elecciones municipales distritales 2018"
-author: "Grupo 12"
+author: "Valeria Lévano Torres, Juan Carlos Pérez Gonzáles, Cristian Serrano Arone, Stephy Riega"
 date: "2023-01-29"
 output: html_document
 ---
@@ -29,21 +29,20 @@ Antes de esta ley, no existía una determinada norma que obligara la postulacion
 
 
 ```{r}
-#Importación de datos----
-#Primero fijamos el directorio donde se ubican los archivos
-setwd("C:/Users/Cristian/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
-getwd()
-```
-
-```{r}
 #Activamos las librerías 
-#Importamos en dataframe cada uno de los archivos
 library(readxl)
 library(ggplot2)
 library(ggpol)
 library(dplyr)
 library(tidyverse)
 library(magrittr)
+library(ggmosaic)
+```
+
+```{r}
+#Importación de datos----
+setwd("C:/Users/Cristian/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
+#Importamos en dataframe cada uno de los archivos
 candidatos <- read_xlsx("ERM2018_Candidatos_Distrital.xlsx")
 padron <- read_xlsx("ERM2018_Padron_Distrital.xlsx")
 resultados <- read_xlsx("ERM2018_Resultados_Distrital.xlsx")
@@ -134,10 +133,7 @@ candidatos_2 |>
   ggplot()+
   geom_mosaic(aes(x = product(macrorregion), fill=Sexo)) +
   theme_mosaic()
-  
-df <- df %>% mutate(region = if_else(departamento %in% c("Amazonas", "Áncash", "La Libertad", "Lambayeque", "Loreto", "Piura", "San Martín"), "norte",
-                                     if_else(departamento %in% c("Lima", "Callao", "Huancavelica", "Ica", "Junín", "Pasco", "Ucayali"), "centro",
-                                             if_else(departamento %in% c("Arequipa", "Ayacucho", "Cusco", "Huánuco", "Puno", "Tacna"), "sur", "NA"))))
 
 ```
 
+Los gráficos presentados muestran la desigualdad en la distribución de candidaturas según el cargo, utilizando un indicador de preferencia basado en la cantidad de candidatos. Ambos gráficos, tanto el de distrito como el de departamento, ilustran la brecha entre hombres y mujeres en la participación política. En el gráfico de distrito, se observa que el grupo de alcaldes distritales tiene una mayor cantidad de candidatos masculinos en comparación con las candidatas. Por otro lado, en el grupo de regidores distritales, se ve una mayor participación femenina. Sin embargo, en ambos grupos, los candidatos masculinos tienen una mayor representación en términos del indicador de preferencia. En el gráfico de departamento se aprecia una similar distribución de candidaturas, mostrando la brecha de género en la política.

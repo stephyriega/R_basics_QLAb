@@ -1,9 +1,7 @@
 #Importación de datos----
-#primero fijamos el directorio donde se ubican los archivos
-setwd("C:/Users/valer/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
-getwd()
+
 #install.packages("ggpol")
-#importamos en df cada uno de los archivos
+
 library(readxl)
 library(ggplot2)
 library(ggpol)
@@ -14,6 +12,10 @@ library(magrittr)
 library(ggmosaic)
 
 
+#primero fijamos el directorio donde se ubican los archivos
+setwd(paste0(getwd(), "/BD/MUNICIPAL DISTRITAL 2018"))
+
+#importamos en df cada uno de los archivos
 candidatos <- read_xlsx("ERM2018_Candidatos_Distrital.xlsx")
 padron <- read_xlsx("ERM2018_Padron_Distrital.xlsx")
 resultados <- read_xlsx("ERM2018_Resultados_Distrital.xlsx")
@@ -110,22 +112,7 @@ ggplot(aut_sum2) +
   labs(title = "Alcaldes distritales jovenes y no jovenes por sexo",
        subtitle="Por si es joven y sexo (en centenas)")
 
-#grafico de barras apiladas
-candidatos <- as.data.frame(candidatos)
-
-candidatos_2 <- candidatos |> 
-  mutate(macrorregion = if_else(Region %in% c("AMAZONAS", "ANCASH", "LA LIBERTAD", "LAMBAYEQUE", "LORETO", "PIURA", "SAN MARTIN"), "Norte",
-                          if_else(Region %in% c("LIMA", "CALLAO", "HUANCAVELICA", "ICA", "JUNIN", "PASCO", "UCAYALI"), "Centro",
-                                  if_else(Region %in% c("AREQUIPA", "AYACUCHO", "CUSCO", "HUANUCO", "PUNO", "TACNA"), "Sur", "NA"))))
-
-candidatos_2 |> 
-  group_by(macrorregion, Sexo) |> 
-  ggplot()+
-  geom_mosaic(aes(x = product(macrorregion), fill=Sexo)) +
-  theme_mosaic()
   
-
-candidatos <- as.data.frame(candidatos)
 ### Grafico de indicador de preferencia por sexo y distrito ----
 candidatos %>%
   group_by(Sexo, Cargo, Distrito) %>%
@@ -160,4 +147,32 @@ candidatos %>%
   ggtitle("Distribución de Candidatos por departamento")+
   # Ayuda a convertir los nombres horizontales en verticales, para que no aparezcan superpuestos
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+#Distribución de candidatos por Macrorregión (Norte, Centro y Sur)
+candidatos <- as.data.frame(candidatos)
+
+candidatos_2 <- candidatos |>
+  mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
+  mutate(Nativo = ifelse(is.na(Nativo), "No Nativo", Nativo)) |> 
+  mutate(macrorregion = if_else(Region %in% c("AMAZONAS" , "CAJAMARCA","LA LIBERTAD", "LAMBAYEQUE", "LORETO", "PIURA", "SAN MARTIN", "TUMBES"), "Norte",
+                                if_else(Region %in% c("LIMA","ANCASH", "CALLAO", "HUANCAVELICA", "HUANUCO", "JUNIN","MADRE DE DIOS", "PASCO", "UCAYALI"), "Centro",
+                                        if_else(Region %in% c("AREQUIPA","APURIMAC", "AYACUCHO", "CUSCO","ICA","MOQUEGUA", "PUNO", "TACNA"), "Sur", "NA"))))
+
+candidatos_2 |> 
+  group_by(macrorregion, Sexo) |> 
+  ggplot()+
+  geom_mosaic(aes(x = product(macrorregion), fill=Sexo)) +
+  ggtitle("Distribución de candidatos por macrorregión y sexo")
+
+
+#Distribución de autoridades elegidas por macrorregion
+autoridades_2 |> 
+  group_by(Macrorregion, Sexo) |> 
+  ggplot()+
+  geom_mosaic(aes(x = product(Macrorregion), fill=Sexo)) +
+  ggtitle("Distribución de autoridades electas por macrorregión y sexo")
+  
+
+
+
 

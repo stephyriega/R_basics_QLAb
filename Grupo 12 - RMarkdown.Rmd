@@ -1,6 +1,6 @@
 ---
 title: "Análisis de las elecciones municipales distritales 2018"
-author: "Valeria Lévano Torres, Juan Carlos Pérez Gonzáles, Cristian Serrano Arone, Stephy Riega"
+author: "Valeria Lévano Torres, Juan Carlos Pérez Gonzáles, Cristian Serrano, Stephy Riega, André Lama"
 date: "2023-01-29"
 output: html_document
 ---
@@ -27,12 +27,15 @@ Aun así, el ejercicio de descripcion es relevante y propio de estudio por como 
 
 Antes de esta ley, no existía una determinada norma que obligara la postulacion participación equitativa de las mujeres en los cargos ,ejecutivos como concejales, o en las preferencia en las listas, de regidores o consejo municipal . Es decir, puede que este último porcentaje que planteamos sea mínimo. Aun así, consideramos que es importante de evaluar pues nos puede dar un indicio de que unidades presentan avances mínimos hacia la igualdad de la participación politicas de las mujeres, aun sin una ley que los obligara.
 
+## Resultados
+
 
 ```{r}
 #Activamos las librerías 
 library(readxl)
 library(ggplot2)
 library(ggpol)
+library(rio)
 library(dplyr)
 library(tidyverse)
 library(magrittr)
@@ -41,7 +44,8 @@ library(ggmosaic)
 
 ```{r}
 #Importación de datos----
-setwd("C:/Users/Cristian/Documents/GitHub/R_basics_QLAb/BD/MUNICIPAL DISTRITAL 2018/")
+#primero fijamos el directorio donde se ubican los archivos
+setwd(paste0(getwd(), "/BD/MUNICIPAL DISTRITAL 2018"))
 #Importamos en dataframe cada uno de los archivos
 candidatos <- read_xlsx("ERM2018_Candidatos_Distrital.xlsx")
 padron <- read_xlsx("ERM2018_Padron_Distrital.xlsx")
@@ -119,21 +123,109 @@ ggplot(aut_sum2) +
        subtitle="Por si es joven y sexo (en centenas)")
 ```
 
+
 ```{r}
-#grafico de barras apiladas
+### Grafico de indicador de preferencia por sexo y distrito ----
+candidatos %>%
+  group_by(Sexo, Cargo, Distrito) %>%
+  summarize(count = n()) %>%  
+  # Crea el gráfico mediante ggplot 
+  ggplot(aes(x = Distrito, y = count, fill = Sexo)) +
+  # Agrega barra con tamaño proporcional a la cantidad de candidatos
+  geom_bar(stat = "identity", position = "fill") + 
+  facet_wrap(~ Cargo ) + #divide el gráfico por cargo
+  #Para colocar la leyenda en la parte inferior del gráfico y para no colocar los nombres de Distro en eje x
+  theme(legend.position = "bottom", axis.text.x = element_blank(), axis.ticks.x = element_blank()) + 
+  # Coloca etiquetas y título. En este gráfico no se considera los nombres del eje x debido a su extensión 
+  ylab("Indicador de preferencia") +
+  ggtitle("Distribución de Candidatos por distrito") 
+```
+
+
+```{r}
+### Grafico de indicador de preferencia por sexo y distrito ----
+unique(candidatos$Region)
+candidatos %>%
+  group_by(Region, Sexo, Cargo, Distrito) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = Region, y = count, fill = Sexo)) +
+  # Agrega barra con tamaño proporcional a la cantidad de candidatos
+  geom_bar(stat = "identity", position = "fill") +
+  facet_wrap(~ Cargo ) + #divide el gráfico por cargo
+  # Para colocar la leyenda en la parte inferior del gráfico
+  theme(legend.position = "bottom") + 
+  # Coloca etiquetas y título 
+  xlab("Region") +
+  ylab("Indicador de preferencia") +
+  ggtitle("Distribución de Candidatos por departamento")+
+  # Ayuda a convertir los nombres horizontales en verticales, para que no aparezcan superpuestos
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+```
+
+
+
+Los gráficos presentados muestran la desigualdad en la distribución de candidaturas según el cargo, utilizando un indicador de preferencia basado en la cantidad de candidatos. Ambos gráficos, tanto el de distrito como el de departamento, ilustran la brecha entre hombres y mujeres en la participación política. En el gráfico de distrito, se observa que el grupo de alcaldes distritales tiene una mayor cantidad de candidatos masculinos en comparación con las candidatas. Por otro lado, en el grupo de regidores distritales, se ve una mayor participación femenina. Sin embargo, en ambos grupos, los candidatos masculinos tienen una mayor representación en términos del indicador de preferencia. En el gráfico de departamento se aprecia una similar distribución de candidaturas, mostrando la brecha de género en la política.
+
+
+
+
+```{r}
+#Distribución de candidatos por Macrorregión (Norte, Centro y Sur)
 candidatos <- as.data.frame(candidatos)
 
-candidatos_2 <- candidatos |> 
-  mutate(macrorregion = if_else(Region %in% c("AMAZONAS", "ANCASH", "LA LIBERTAD", "LAMBAYEQUE", "LORETO", "PIURA", "SAN MARTIN"), "Norte",
-                          if_else(Region %in% c("LIMA", "CALLAO", "HUANCAVELICA", "ICA", "JUNIN", "PASCO", "UCAYALI"), "Centro",
-                                  if_else(Region %in% c("AREQUIPA", "AYACUCHO", "CUSCO", "HUANUCO", "PUNO", "TACNA"), "Sur", "NA"))))
+candidatos_2 <- candidatos |>
+  mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
+  mutate(Nativo = ifelse(is.na(Nativo), "No Nativo", Nativo)) |> 
+  mutate(macrorregion = if_else(Region %in% c("AMAZONAS" , "CAJAMARCA","LA LIBERTAD", "LAMBAYEQUE", "LORETO", "PIURA", "SAN MARTIN", "TUMBES"), "Norte",
+                                if_else(Region %in% c("LIMA","ANCASH", "CALLAO", "HUANCAVELICA", "HUANUCO", "JUNIN","MADRE DE DIOS", "PASCO", "UCAYALI"), "Centro",
+                                        if_else(Region %in% c("AREQUIPA","APURIMAC", "AYACUCHO", "CUSCO","ICA","MOQUEGUA", "PUNO", "TACNA"), "Sur", "NA"))))
 
 candidatos_2 |> 
   group_by(macrorregion, Sexo) |> 
   ggplot()+
   geom_mosaic(aes(x = product(macrorregion), fill=Sexo)) +
-  theme_mosaic()
+  ggtitle("Distribución de candidatos por macrorregión y sexo")
 
 ```
 
-Los gráficos presentados muestran la desigualdad en la distribución de candidaturas según el cargo, utilizando un indicador de preferencia basado en la cantidad de candidatos. Ambos gráficos, tanto el de distrito como el de departamento, ilustran la brecha entre hombres y mujeres en la participación política. En el gráfico de distrito, se observa que el grupo de alcaldes distritales tiene una mayor cantidad de candidatos masculinos en comparación con las candidatas. Por otro lado, en el grupo de regidores distritales, se ve una mayor participación femenina. Sin embargo, en ambos grupos, los candidatos masculinos tienen una mayor representación en términos del indicador de preferencia. En el gráfico de departamento se aprecia una similar distribución de candidaturas, mostrando la brecha de género en la política.
+```{r}
+#Distribución de autoridades electas por departamento
+
+autoridades <- as.data.frame(autoridades)
+autoridades_2 <- autoridades |>
+  mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
+  mutate(Nativo = ifelse(is.na(Nativo), "No Nativo", Nativo)) |> 
+  mutate(Macrorregion = if_else(Región %in% c("AMAZONAS" , "CAJAMARCA","LA LIBERTAD", "LAMBAYEQUE", "LORETO", "PIURA", "SAN MARTIN", "TUMBES"), "Norte",
+                                if_else(Región %in% c("LIMA","ANCASH", "CALLAO", "HUANCAVELICA", "HUANUCO", "JUNIN","MADRE DE DIOS", "PASCO", "UCAYALI"), "Centro",
+                                        if_else(Región %in% c("AREQUIPA","APURIMAC", "AYACUCHO", "CUSCO","ICA","MOQUEGUA", "PUNO", "TACNA"), "Sur", "NA"))))
+
+autoridades_2 |> 
+  group_by(Región, Sexo) |> 
+  ggplot()+
+  geom_mosaic(aes(x = product(Región), fill=Sexo)) +
+  ggtitle("Distribución de autoridades electas por región y sexo")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = "none") 
+```
+
+```{r}
+#Distribución de autoridades elegidas por macrorregion
+autoridades_2 |> 
+  group_by(Macrorregion, Sexo) |> 
+  ggplot()+
+  geom_mosaic(aes(x = product(Macrorregion), fill=Sexo)) +
+  ggtitle("Distribución de autoridades electas por macrorregión y sexo")
+  
+```
+
+
+
+
+
+
+
+
+
+
+
+

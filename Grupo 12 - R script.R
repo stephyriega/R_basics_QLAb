@@ -260,3 +260,21 @@ autoridades_2 %>%
 
 ggsave("grafico4.png", plot = last_plot(), width = 6, height = 4, units = "in")
 
+
+
+#Prioridad en la lista postulante a regidor 
+
+indice <-candidatos |> 
+  mutate(grupo = cut(`N°`, breaks = seq(from = min(`N°`), to = max(`N°`), by = 1))) |> 
+  group_by(grupo, Sexo) |> 
+  summarise(nro_candidatos=n()) 
+
+indice <-as.data.frame(indice)
+indice|> 
+  filter(!is.na(grupo)) |> 
+  ggplot()+
+  aes(x=grupo, fill=Sexo) +
+  aes(y=nro_candidatos)+
+  geom_bar(stat = "identity", position = "stack")+
+  scale_x_discrete(labels = c("1", "2", "3","4", "5","6","7","8","9","10","11","12","13","14","15"))
+

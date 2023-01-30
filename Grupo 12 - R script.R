@@ -278,3 +278,20 @@ indice|>
   geom_bar(stat = "identity", position = "stack")+
   scale_x_discrete(labels = c("1", "2", "3","4", "5","6","7","8","9","10","11","12","13","14","15"))
 
+
+
+#Mapa de calor
+library(mapsPERU)
+
+install.packages("mapsPERU")
+
+
+#https://github.com/musajajorge/mapsPERU
+
+
+
+
+
+
+
+

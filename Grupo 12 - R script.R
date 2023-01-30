@@ -269,3 +269,87 @@ ggsave("grafico4.png", plot = last_plot(), width = 6, height = 4, units = "in")
 
 
 
+
+###Cambio  de nombre a una columna:
+
+colnames(autoridades)[colnames(autoridades) == "Cargo electo"] = "Cargo_electo"
+
+#Gráfico a nivel nacional de la proporción de alcades distritales por sexo:
+
+autoridades %>%
+  filter(Cargo_electo == "ALCALDE DISTRITAL") %>%
+  group_by(Sexo) %>%
+  summarize(count = n()) %>%
+  mutate(percent = count/sum(count)) %>%
+  ggplot(aes(x = "", y = percent, fill = Sexo)) +
+  geom_bar(width = 1, stat = "identity", position = "fill") +
+  geom_text(aes(label = scales::percent(percent)), position = position_stack(vjust = 0.5))+
+  scale_y_continuous(labels = scales::percent) +
+  ggtitle("Proporción Nacional de Alcaldes Distritales por Género") +
+  xlab("Alcaldes distritales a nivel Nacional") +
+  ylab("Proporción por Sexo") +
+  theme(legend.position = "bottom", axis.text.x = element_blank(), axis.ticks.x = element_blank())
+
+ggsave("grafico1.png", plot = last_plot(), width = 6, height = 4, units = "in")
+
+
+### Grafico de regidores distritales por sexo y distrito ----
+
+autoridades %>%
+  filter(Cargo_electo == "REGIDOR DISTRITAL") %>%
+  group_by(Sexo, Distrito) %>%
+  summarize(count = n()) %>%  
+  ggplot(aes(x = Distrito, y = count, fill = Sexo)) +
+  geom_bar(stat = "identity", position = "fill") + 
+  theme(legend.position = "bottom", axis.text.x = element_blank(), axis.ticks.x = element_blank()) + 
+  ylab("Proporción por Sexo") +
+  ggtitle("Distribución de Regidores Distritales por distrito") 
+
+ggsave("grafico2.png", plot = last_plot(), width = 6, height = 4, units = "in")
+
+
+###Cambio  de nombre a una columna:
+
+colnames(autoridades)[colnames(autoridades) == "Región"] = "Region"
+
+### Grafico de autoridades distritales por sexo y departamento ----
+unique(autoridades$Region)
+autoridades %>%
+  group_by(Region, Sexo, Cargo_electo, Distrito) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = Region, y = count, fill = Sexo)) +
+  geom_bar(stat = "identity", position = "fill") +
+  facet_wrap(~ Cargo_electo ) + 
+  theme(legend.position = "bottom") + 
+  xlab("Region") +
+  ylab("Proporción por Sexo") +
+  ggtitle("Distribución de Autoridades por departamento")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+ggsave("grafico3.png", plot = last_plot(), width = 6, height = 4, units = "in")
+
+
+#Distribución de autoridades por Macrorregión (Norte, Centro y Sur)
+autoridades <- as.data.frame(autoridades)
+
+autoridades_2 <- autoridades |>
+  mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
+  mutate(Nativo = ifelse(is.na(Nativo), "No Nativo", Nativo)) |> 
+  mutate(macrorregion = if_else(Region %in% c("AMAZONAS" , "CAJAMARCA","LA LIBERTAD", "LAMBAYEQUE", "LORETO", "PIURA", "SAN MARTIN", "TUMBES"), "Norte",
+                                if_else(Region %in% c("LIMA","ANCASH", "CALLAO", "HUANCAVELICA", "HUANUCO", "JUNIN","MADRE DE DIOS", "PASCO", "UCAYALI"), "Centro",
+                                        if_else(Region %in% c("AREQUIPA","APURIMAC", "AYACUCHO", "CUSCO","ICA","MOQUEGUA", "PUNO", "TACNA"), "Sur", "NA"))))
+
+
+autoridades_2 %>% 
+  group_by(macrorregion, Sexo) %>% 
+  summarize(count = n()) %>% 
+  mutate(percent = count / sum(count) * 100) %>% 
+  ggplot(aes(x = macrorregion, y = percent, fill = Sexo)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_text(aes(label = paste0(round(percent, 1), "%")), position = position_stack(vjust = 0.5)) +
+  ggtitle("Distribución de Autoridades por macrorregión y sexo") +
+  xlab("Macrorregión") +
+  ylab("Proporción por Sexo")
+
+ggsave("grafico4.png", plot = last_plot(), width = 6, height = 4, units = "in")
+

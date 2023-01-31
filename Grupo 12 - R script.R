@@ -244,7 +244,7 @@ autoridades <- as.data.frame(autoridades)
 autoridades_2 <- autoridades |>
   mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
   mutate(Nativo = ifelse(is.na(Nativo), "No Nativo", Nativo)) |> 
-  mutate(macrorregion = if_else(Región %in% c("AMAZONAS" , "CAJAMARCA","LA LIBERTAD", "LAMBAYEQUE", "LORETO", "PIURA", "SAN MARTIN", "TUMBES"), "Norte",
+  mutate(Macrorregion = if_else(Región %in% c("AMAZONAS" , "CAJAMARCA","LA LIBERTAD", "LAMBAYEQUE", "LORETO", "PIURA", "SAN MARTIN", "TUMBES"), "Norte",
                                 if_else(Región %in% c("LIMA","ANCASH", "CALLAO", "HUANCAVELICA", "HUANUCO", "JUNIN","MADRE DE DIOS", "PASCO", "UCAYALI"), "Centro",
                                         if_else(Región %in% c("AREQUIPA","APURIMAC", "AYACUCHO", "CUSCO","ICA","MOQUEGUA", "PUNO", "TACNA"), "Sur", "NA"))))
 
@@ -278,7 +278,10 @@ indice|>
   aes(x=grupo, fill=Sexo) +
   aes(y=nro_candidatos)+
   geom_bar(stat = "identity", position = "stack")+
-  scale_x_discrete(labels = c("1", "2", "3","4", "5","6","7","8","9","10","11","12","13","14","15"))
+  scale_x_discrete(labels = c("1", "2", "3","4", "5","6","7","8","9","10","11","12","13","14","15"))+
+  labs(title = "Proporción por Sexo según el Número de Candidatura del Regidor") +
+  xlab("Número de Candidatura") +
+  ylab("Número de Candidatos")
 
 
 
@@ -356,25 +359,72 @@ df_mapa |>
 
 
 
+autoridades_map <- autoridades_2 |>
+  group_by(Región, `Cargo electo`, Sexo) |>  
+  summarize(count = n()) |> 
+  mutate(percent = count / sum(count) * 100) |>
+  mutate(Región=recode(Región,
+                       "AMAZONAS"="Amazonas",
+                       "ANCASH"="Áncash",
+                       "APURIMAC"="Apurímac",
+                       "AREQUIPA"="Arequipa",
+                       "AYACUCHO"="Ayacucho",
+                       "CAJAMARCA"="Cajamarca",
+                       "CALLAO"="Callao",
+                       "CUSCO"="Cusco",
+                       "HUANCAVELICA"="Huancavelica",
+                       "HUANUCO"="Huánuco",
+                       "ICA"="Ica",
+                       "JUNIN"="Junín",
+                       "LA LIBERTAD"="La Libertad",
+                       "LAMBAYEQUE"="Lambayeque",
+                       "LIMA"="Lima",
+                       "LORETO"="Loreto",
+                       "MADRE DE DIOS"="Madre de Dios",
+                       "MOQUEGUA"="Moquegua",
+                       "PASCO"="Pasco",
+                       "PIURA"="Piura",
+                       "PUNO"="Puno",
+                       "SAN MARTIN"="San Martín",
+                       "TACNA"="Tacna",
+                       "TUMBES"="Tumbes",
+                       "UCAYALI"="Ucayali"))
 
 
 
 
+df_mapa_autoridades <- map_DEP
+
+df_mapa_autoridades<-left_join(df_mapa_autoridades, autoridades_map, by=c("DEPARTAMENTO"="Región"))
+
+df_mapa_autoridades |>
+  filter(Sexo=="Femenino", `Cargo electo`  == "ALCALDE DISTRITAL") |>
+  ggplot() +
+  aes(geometry=geometry)+
+  geom_sf(aes(fill=percent)) +
+  scale_fill_gradient (low="white", high="red3", name = "Porcentaje")+
+  labs(title = "Participación femenina a nivel de alcaldes distritales",
+       subtitle="(Autoridades electas)") +
+  theme(axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+df_mapa_autoridades |>
+  filter(Sexo=="Femenino", `Cargo electo` =="REGIDOR DISTRITAL") |>
+  ggplot() +
+  aes(geometry=geometry)+
+  geom_sf(aes(fill=percent)) +
+  scale_fill_gradient (low="white", high="red3", name = "Porcentaje")+
+  labs(title = "Participación femenina a nivel de regidores distritales",
+       subtitle="(Autoridades electas)") +
+  theme(axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())

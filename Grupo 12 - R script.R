@@ -8,6 +8,8 @@ library(dplyr)
 library(tidyverse)
 library(magrittr)
 library(ggmosaic)
+library(mapsPERU)
+library(sf)
 
 #Importación de datos----
 #primero fijamos el directorio donde se ubican los archivos
@@ -281,12 +283,93 @@ indice|>
 
 
 #Mapa de calor
-library(mapsPERU)
-
-install.packages("mapsPERU")
-
 
 #https://github.com/musajajorge/mapsPERU
+
+candidatos_map <- candidatos_2 |>
+  group_by(Region,Cargo, Sexo,) |>  
+  summarize(count = n()) |> 
+  mutate(percent = count / sum(count) * 100) |>
+  mutate(Region=recode(Region,
+                       "AMAZONAS"="Amazonas",
+                         "ANCASH"="Áncash",
+                         "APURIMAC"="Apurímac",
+                         "AREQUIPA"="Arequipa",
+                         "AYACUCHO"="Ayacucho",
+                         "CAJAMARCA"="Cajamarca",
+                         "CALLAO"="Callao",
+                         "CUSCO"="Cusco",
+                         "HUANCAVELICA"="Huancavelica",
+                         "HUANUCO"="Huánuco",
+                         "ICA"="Ica",
+                         "JUNIN"="Junín",
+                         "LA LIBERTAD"="La Libertad",
+                         "LAMBAYEQUE"="Lambayeque",
+                         "LIMA"="Lima",
+                         "LORETO"="Loreto",
+                         "MADRE DE DIOS"="Madre de Dios",
+                         "MOQUEGUA"="Moquegua",
+                         "PASCO"="Pasco",
+                         "PIURA"="Piura",
+                         "PUNO"="Puno",
+                         "SAN MARTIN"="San Martín",
+                         "TACNA"="Tacna",
+                         "TUMBES"="Tumbes",
+                         "UCAYALI"="Ucayali"))
+  
+  
+df_mapa <- map_DEP
+
+df_mapa<-left_join(df_mapa, candidatos_map, by=c("DEPARTAMENTO"="Region"))
+
+df_mapa |>
+filter(Sexo=="Femenino", Cargo=="ALCALDE DISTRITAL") |>
+ggplot() +
+  aes(geometry=geometry)+
+  geom_sf(aes(fill=percent)) +
+  scale_fill_gradient (low="white", high="red3", name = "Porcentaje")+
+  ggtitle("Participación femenina a nivel de alcades distritales")+
+  theme(axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+
+
+df_mapa |>
+  filter(Sexo=="Femenino", Cargo=="REGIDOR DISTRITAL") |>
+  ggplot() +
+  aes(geometry=geometry)+
+  geom_sf(aes(fill=percent)) +
+  scale_fill_gradient (low="white", high="red3", name = "Porcentaje")+
+  ggtitle("Participación femenina a nivel de regidores distritales")+
+  theme(axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

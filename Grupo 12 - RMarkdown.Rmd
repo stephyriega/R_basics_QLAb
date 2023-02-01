@@ -2,11 +2,18 @@
 title: "La desigualdad en la participacion politica de las mujeres en las elecciones municipales distritales del 2018"
 author: "Valeria Lévano Torres, Juan Carlos Pérez Gonzáles, Cristian Serrano, Stephy Riega, André Lama"
 date: "2023-01-29"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme:
+      bootswatch: cosmo
+
+    
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
 ## Introducción

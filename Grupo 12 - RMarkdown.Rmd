@@ -38,9 +38,9 @@ Antes de esta ley, no existía una determinada norma que obligara la postulacion
 
 ## Metodología
 
-Para realizar el análisis descriptivo utilizaremos las bases de datos proporcionadas por JNE en su portal web Infogob referente a las elecciones municipales distritales 2018. Estas bases contienen información acerca de los candidatos, el padrón electoral, los resultados electorales a nivel de distrito y las autoridades electas.
+Para realizar el análisis descriptivo utilizaremos las bases de datos proporcionadas por JNE en su portal web Infogob[https://infogob.jne.gob.pe/BaseDatos] referente a las elecciones municipales distritales 2018. Como un extra también se analiza de forma general las elecciones del 2002, 2006, 2010 y 2014 para ver la evolución de la participación femenina en las elecciones municipales distritales. Estas bases contienen información acerca de los candidatos, el padrón electoral, los resultados electorales a nivel de distrito y las autoridades electas.
 
-El procesamiento de los datos se realizará con el paquete dlpyr de tidyverse y los gráficos con el paquete ggplot2 y otras extensiones de este paquete como mapsPERU, magrittr, entre otras.
+El procesamiento de los datos se realizará con el paquete *dlpyr* de *tidyverse* y los gráficos con el paquete *ggplot2*,  otras extensiones de este paquete como *ggmosaic*, *magrittr* y *gganimate* y para graficar los mapas del Perú usamos el paquete *mapsPERU*. 
 
 
 ## Resultados
@@ -116,7 +116,8 @@ candidatos %>%
 
 ```{r}
 #Distribución de candidatos por Macrorregión (Norte, Centro y Sur)
-#candidatos <- as.data.frame(candidatos)
+#Llenamos los valores vacíos de las variables Joven y Nativo
+#Luego, agrupamos los departamentos en macrorregiones
 
 candidatos_2 <- candidatos |>
   mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
@@ -136,13 +137,16 @@ Los gráficos presentados muestran la desigualdad en la distribución de candida
 
 
 ```{r}
-#Prioridad en la lista postulante a regidor 
+#Prioridad del candidato a regidor en la lista postulante
+#Primeros agrupamos los candidatos de acuerdo a su posición en la lista
+#calculamos la cantidad por cada posición y sexo
 
 indice <-candidatos |> 
   mutate(grupo = cut(`N°`, breaks = seq(from = min(`N°`), to = max(`N°`), by = 1))) |> 
   group_by(grupo, Sexo) |> 
   summarise(nro_candidatos=n()) 
 
+#realizamos un grafico de barras 
 indice <-as.data.frame(indice)
 indice|> 
   filter(!is.na(grupo)) |> 
@@ -151,8 +155,8 @@ indice|>
   aes(y=nro_candidatos)+
   geom_bar(stat = "identity", position = "stack")+
   scale_x_discrete(labels = c("1", "2", "3","4", "5","6","7","8","9","10","11","12","13","14","15"))+
-  labs(title = "Proporción por Sexo según el Número de Candidatura del Regidor") +
-  xlab("Número de Candidatura") +
+  labs(title = "Proporción por Sexo según la posición del regidor en la lista") +
+  xlab("Posición en la lista candidata") +
   ylab("Número de Candidatos")
 
 ```
@@ -163,6 +167,8 @@ Por otro lado, resulta importante también a analizar la lista de regidores por 
 
 ```{r}
 #Mapa de calor
+#construnimos un mapa
+#primero, agrupamos los candidatos por 
 
 #https://github.com/musajajorge/mapsPERU
 

@@ -168,8 +168,9 @@ Por otro lado, resulta importante también a analizar la lista de regidores por 
 ```{r}
 #Mapa de calor
 #construnimos un mapa
-#primero, agrupamos los candidatos por 
-
+#primero, agrupamos los candidatos por departamento, cargo, sexo
+#calculamos el porcenatje de participacion por sexo
+#luego, cambiamos los valores de la variable region para poder realizar el join
 #https://github.com/musajajorge/mapsPERU
 
 candidatos_map <- candidatos_2 |>
@@ -203,13 +204,18 @@ candidatos_map <- candidatos_2 |>
                          "TUMBES"="Tumbes",
                          "UCAYALI"="Ucayali"))
   
-  
+#importamos el shape file del mapa de la libreria mapsPERU  
 df_mapa <- map_DEP
 
+# realizamos la union de los dos df
 df_mapa<-left_join(df_mapa, candidatos_map, by=c("DEPARTAMENTO"="Region"))
 ```
 
 ```{r}
+
+#graficamos el mapa incluyendo el porcentaje de participacion femenina 
+#para ello filtramos el sexo femenino y cargo igual a alcalde distrital,
+#puesto que se desea saber el comportamiento de los candidatos a alcalde
 df_mapa |>
 filter(Sexo=="Femenino", Cargo=="ALCALDE DISTRITAL") |>
 ggplot() +
@@ -231,6 +237,7 @@ A partir de este grafico, se denota que, a nivel de alcaldes distritales, los de
 
 
 ```{r}
+# de igual, se realiza el mapa para los candidatos a regidro
 df_mapa |>
   filter(Sexo=="Femenino", Cargo=="REGIDOR DISTRITAL") |>
   ggplot() +
@@ -249,6 +256,10 @@ df_mapa |>
 
 
 ```{r}
+
+#similar al df de candidatos, se llena los valores vacios
+# se agrupa los departamentos pr macrorregion
+
 autoridades_2 <- autoridades |>
   mutate(Joven = ifelse(is.na(Joven), "No Joven", Joven)) |> 
   mutate(Nativo = ifelse(is.na(Nativo), "No Nativo", Nativo)) |> 
@@ -256,6 +267,8 @@ autoridades_2 <- autoridades |>
                                 if_else(Región %in% c("LIMA","ANCASH", "CALLAO", "HUANCAVELICA", "HUANUCO", "JUNIN","MADRE DE DIOS", "PASCO", "UCAYALI"), "Centro",
                                         if_else(Región %in% c("AREQUIPA","APURIMAC", "AYACUCHO", "CUSCO","ICA","MOQUEGUA", "PUNO", "TACNA"), "Sur", "NA"))))
 
+# se calcula el porcentaje de participacion por sexo
+#y recodifica los valores de la variable region
 autoridades_map <- autoridades_2 |>
   group_by(Región, `Cargo electo`, Sexo) |>  
   summarize(count = n()) |> 
@@ -504,10 +517,12 @@ autoridades_2 %>%
 
 
 ```{r}
+# se importa el df de para graficar el mapa por autoridades electas
 df_mapa_autoridades <- map_DEP
 
 df_mapa_autoridades<-left_join(df_mapa_autoridades, autoridades_map, by=c("DEPARTAMENTO"="Región"))
 
+# se grafica la participacion femenina de las alcadesas electas
 df_mapa_autoridades |>
   filter(Sexo=="Femenino", `Cargo electo`  == "ALCALDE DISTRITAL") |>
   ggplot() +
@@ -524,7 +539,11 @@ df_mapa_autoridades |>
         axis.title.y = element_blank())
 ```
 
+A partir de este grafico, se observa que si bien Ica y San Martín no eran las regiones con mayor participación femenina en las elecciones a nivel de alcaldes distritales, sí son aquellas en las que mayor postulantes femeninas fueron electas.
+Por otro lado, se resalta que los departamentos en los que casi ninguna candidata femenina fue electa son Apurímac, Moquegua y Pasco.
+
 ```{r}
+# se grafica la participacion femenina de las regidoras electas
 df_mapa_autoridades |>
   filter(Sexo=="Femenino", `Cargo electo` =="REGIDOR DISTRITAL") |>
   ggplot() +
@@ -541,28 +560,36 @@ df_mapa_autoridades |>
         axis.title.y = element_blank())
 ```
 
+A partir de este grafico, se observa que, si bien el departamento de Madre de Dios no era uno de los que contaba con mayor participación femenina a nivel de regidores distritales, sí lo son respecto a la cantidad de mujeres electas con dicho cargo.
+Por otro lado, Cajamarca y Cusco son las regiones en que menos mujeres fueren electas como regidores distritales.
+
+
 
 ## Conclusiones
 
-Si bien, desde el año 1955, las mujeres en el Perú adquirieron el derecho a votar y a ser elegidas, la participación política de la mujer se ha caracterizado por ser minoritaria al momento de postular como al momento de ser elegida. Esto es reflejado aun en las elecciones municipales del 2018.
-Para las candidaturas,
-Existe una mayor cantidad de hombres que postulan a cargos de regidores como alcaldes; sin embargo, las mujeres estan mas presentes en las candidaturas a regidores.
-Si desagregamos estos datos a nivel departamental, no existe mucha diferencia entre quienes postulan por departamentos para los puestos de regidores distritales, pero si para los puestos de alcalde distrital.
+- Si bien, desde el año 1955, las mujeres en el Perú adquirieron el derecho a votar y a ser elegidas, la participación política de la mujer se ha caracterizado por ser minoritaria al momento de postular como al momento de ser elegida. Esto es reflejado aun en las elecciones municipales del 2018.
 
-Para las autoridades electas, 
-Existe variabilidad en la presencia de mujeres electas como representantes que se va reduciendo mientras agregamos los datos niveles geograficos.
+- Para las candidaturas,
+  - Existe una mayor cantidad de hombres que postulan a cargos de regidores como alcaldes; sin embargo, las mujeres estan mas presentes en las candidaturas a regidores.
+  - Si desagregamos estos datos a nivel departamental, no existe mucha diferencia entre quienes postulan por departamentos para los puestos de regidores distritales, pero si para los puestos de alcalde distrital.
+  
+
+- Para las autoridades electas, 
+  - Existe variabilidad en la presencia de mujeres electas como representantes que se va reduciendo mientras agregamos los datos niveles geograficos.
 Existe una mayor representacion masculina para los puestos de regidores como de alcaldia. Sin embargo, parece que las mujeres ocupan mas puestos en el caso de regidores distritales
-En el caso de las elecciones a regidores, se revierte la situacion de mayoria masculina si nos centramos en autoridades jovenes. En el caso de las elecciones de alcaldia, las mujeres representan una minoria tanto  para autoridades jovenes como no jovenes.
-Como recomendaciones, 
+  - En el caso de las elecciones a regidores, se revierte la situacion de mayoria masculina si nos centramos en autoridades jovenes. En el caso de las elecciones de alcaldia, las mujeres representan una minoria tanto  para autoridades jovenes como no jovenes.
+
+- Como recomendaciones, 
 Reconocemos que hacen falta políticas de sensibilización y de educación para mejorar el escenario en las elecciones de alcaldesas
 Mejoras en la ley de cuotas sobre los partidos para mejorar la presencia femenina de regidoras y alcaldesas a nivel nacional.
 
 ## Bibliografía
 
-Dirección Nacional de educación y formación cívica ciudadana. (2022). Paridad y alternancia en las elecciones internas ERM 2022.
-Direccion Nacional de Educación y Formación Cívico Ciudadana. (2020). Paridad y alternancia de género en las listas electorales Ley 31030.
-Gerring, J. (2012). Mere description. British Journal of Political Science, 42(4), 721–746. https://doi.org/10.1017/S0007123412000130
-
+Dirección Nacional de educación y formación cívica ciudadana. (2022). *Paridad y alternancia en las elecciones internas* ERM 2022.
+Direccion Nacional de Educación y Formación Cívico Ciudadana. (2020). *Paridad y alternancia de género en las listas electorales Ley 31030.*
+Gerring, J. (2012). *Mere description.* British Journal of Political Science, 42(4), 721–746. [https://doi.org/10.1017/S0007123412000130]
+Infogob (2023). *Observatorio para la gobernabilidad.* Disponible en:
+[https://infogob.jne.gob.pe/]
 
 
 

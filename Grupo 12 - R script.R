@@ -13,7 +13,7 @@ library(sf)
 
 #Importación de datos----
 #primero fijamos el directorio donde se ubican los archivos
-setwd(paste0(getwd(), "/BD/MUNICIPAL DISTRITAL 2018"))
+setwd("C:/Users/hecto/OneDrive/Documents/GitHub/R_basics/BD/MUNICIPAL DISTRITAL 2018")
 
 #importamos en df cada uno de los archivos
 candidatos <- read_xlsx("ERM2018_Candidatos_Distrital.xlsx")
@@ -180,11 +180,11 @@ ggplot() +
   
 
 #Distribución de autoridades elegidas por macrorregion
-autoridades_2 |> 
-  group_by(Macrorregion, Sexo) |> 
-  ggplot()+
-  geom_mosaic(aes(x = product(Macrorregion), fill=Sexo)) +
-  ggtitle("Distribución de autoridades electas por macrorregión y sexo")
+#autoridades_2 |> 
+ # group_by(Macrorregion, Sexo) |> 
+  #ggplot()+
+  #geom_mosaic(aes(x = product(Macrorregion), fill=Sexo)) +
+  #ggtitle("Distribución de autoridades electas por macrorregión y sexo")
   
 
 #Gráfico a nivel nacional de la proporción de alcades distritales por sexo:
@@ -250,10 +250,10 @@ autoridades_2 <- autoridades |>
 
 
 autoridades_2 %>% 
-  group_by(macrorregion, Sexo) %>% 
+  group_by(Macrorregion, Sexo) %>% 
   summarize(count = n()) %>% 
   mutate(percent = count / sum(count) * 100) %>% 
-  ggplot(aes(x = macrorregion, y = percent, fill = Sexo)) +
+  ggplot(aes(x = Macrorregion, y = percent, fill = Sexo)) +
   geom_bar(stat = "identity", position = "stack") +
   geom_text(aes(label = paste0(round(percent, 1), "%")), position = position_stack(vjust = 0.5)) +
   ggtitle("Distribución de Autoridades por macrorregión y sexo") +
@@ -428,3 +428,129 @@ df_mapa_autoridades |>
         axis.ticks = element_blank(),
         axis.title.x = element_blank(),
         axis.title.y = element_blank())
+
+#Gráfico de barras dinámico por departamentos
+
+autoridades18 <- read_xlsx("ERM2018_Autoridades_Distrital.xlsx")
+autoridades14 <- read_xlsx("ERM2014_Autoridades_Distrital.xlsx")
+autoridades10 <- read_xlsx("ERM2010_Autoridades_Distrital.xlsx")
+autoridades06 <- read_xlsx("ERM2006_Autoridades_Distrital.xlsx")
+autoridades02 <- read_xlsx("ERM2002_Autoridades_Distrital.xlsx")
+
+autoridades18$año <- 2018
+autoridades14$año <- 2014
+autoridades10$año <- 2010
+autoridades06$año <- 2006
+autoridades02$año <- 2002
+
+autoridades18 <- autoridades18 %>% select("Región", "Cargo electo", "año", "Sexo")
+autoridades14 <- autoridades14 %>% select("Región", "Cargo electo", "año", "Sexo")
+autoridades10 <- autoridades10 %>% select("Región", "Cargo electo", "año", "Sexo")
+autoridades06 <- autoridades06 %>% select("Región", "Cargo electo", "año", "Sexo")
+autoridades02 <- autoridades02 %>% select("Región", "Cargo electo", "año", "Sexo")
+
+autoridades_final <- bind_rows(autoridades18, autoridades14, autoridades10, autoridades06, autoridades02)
+#####
+colnames(autoridades_final)[2] <- "Cargo"
+
+
+autoridades_final_sum <- autoridades_final |> 
+  group_by(Región, Cargo, año, Sexo) |> 
+  summarize(count = n()) |> 
+  mutate(Porcentaje = round(count / sum(count) * 100, digit=2))
+
+#Alcalde distrital:
+
+al_dist_sum<- autoridades_final_sum|>
+  filter(Sexo == "Femenino", Cargo == "ALCALDE DISTRITAL") |>
+  group_by(año) |> 
+  arrange(año, desc(Porcentaje)) |> 
+  mutate(ranking=row_number())%>%
+  filter(ranking <= 10)
+
+animacion_al <- al_dist_sum |> 
+  ggplot() +
+  geom_col(aes(ranking, Porcentaje, fill = Región )) +
+  geom_text(aes(ranking, Porcentaje, label = sprintf("%.2f", Porcentaje)), hjust=-0.1) +
+  geom_text(aes(ranking, y=0 , label = Región), hjust=1.1) + 
+  geom_text(aes(x=6, y=max(Porcentaje) , label = as.factor(año)), vjust = 0.2, alpha = 0.5,  col = "gray", size = 20) +
+  coord_flip(clip = "off", expand = FALSE) + scale_x_reverse() +
+  theme_minimal() + theme(
+    panel.grid = element_blank(), 
+    legend.position = "none",
+    axis.ticks.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    plot.margin = margin(2, 8, 4, 12, "cm")
+  ) +
+  transition_states(año, state_length = 0, transition_length = 2) +
+  labs(title = "Porcentaje de participación femenina en las alcaldías distritales") +
+  enter_fade() +
+  exit_fade() + 
+  ease_aes('quadratic-in-out') 
+
+animate(animacion_al, width = 1000, height = 800, fps = 25, duration = 30, rewind = FALSE) +
+  pause(5)
+
+#Regidor distrital:
+
+reg_dist_sum<- autoridades_final_sum|>
+  filter(Sexo == "Femenino", Cargo == "REGIDOR DISTRITAL") |>
+  group_by(año) |> 
+  arrange(año, desc(Porcentaje)) |> 
+  mutate(ranking=row_number())%>%
+  filter(ranking <= 10)
+
+animacion_reg <- reg_dist_sum |> 
+  ggplot() +
+  geom_col(aes(ranking, Porcentaje, fill = Región )) +
+  geom_text(aes(ranking, Porcentaje, label = sprintf("%.2f", Porcentaje)), hjust=-0.1) +
+  geom_text(aes(ranking, y=0 , label = Región), hjust=1.1) + 
+  geom_text(aes(x=6, y=max(Porcentaje) , label = as.factor(año)), vjust = 0.2, alpha = 0.5,  col = "gray", size = 20) +
+  coord_flip(clip = "off", expand = FALSE) + scale_x_reverse() +
+  theme_minimal() + theme(
+    panel.grid = element_blank(), 
+    legend.position = "none",
+    axis.ticks.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    plot.margin = margin(2, 8, 4, 12, "cm")
+  ) +
+  transition_states(año, state_length = 0, transition_length = 2) +
+  labs(title = "Porcentaje de participación femenina en cargos de regidoras distritales") +
+  enter_fade() +
+  exit_fade() + 
+  ease_aes('quadratic-in-out') 
+
+animate(animacion_reg, width = 1000, height = 800, fps = 25, duration = 30, rewind = FALSE) +
+  pause(5)
+
+#EJEMPLO
+posit_sum_2<- posit_sum|>
+  filter(n_meses<22) |>
+  group_by(n_meses) |> 
+  arrange(n_meses, desc(casos_mes)) |> 
+  mutate(ranking=row_number())
+
+animacion <- posit_sum_2 |> 
+  ggplot() +
+  geom_col(aes(ranking, casos_mes, fill = DEPARTAMENTO )) +
+  geom_text(aes(ranking, casos_mes, label = casos_mes), hjust=-0.1) +
+  geom_text(aes(ranking, y=0 , label = DEPARTAMENTO), hjust=1.1) + 
+  geom_text(aes(x=6, y=max(casos_mes) , label = as.factor(n_meses)), vjust = 0.2, alpha = 0.5,  col = "gray", size = 20) +
+  coord_flip(clip = "off", expand = FALSE) + scale_x_reverse() +
+  theme_minimal() + theme(
+    panel.grid = element_blank(), 
+    legend.position = "none",
+    axis.ticks.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    plot.margin = margin(1, 4, 2, 6, "cm")
+  ) +
+  transition_states(n_meses, state_length = 0, transition_length = 2) +
+  labs(title = "Numero de casos COVID por departamento")+ 
+  enter_fade() +
+  exit_fade() + 
+  ease_aes('quadratic-in-out') 
+
+animate(animacion, width = 700, height = 500, fps = 25, duration = 30, rewind = FALSE)
